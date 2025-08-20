@@ -1,48 +1,132 @@
 "use client"
 
-import { AlertCircleIcon, PaperclipIcon, UploadIcon, XIcon } from "lucide-react"
-
-import {
-  formatBytes,
-  useFileUpload,
-} from "@/hooks/use-file-upload"
+import { useState, useCallback } from "react"
+import { AlertCircleIcon, FileTextIcon, UploadCloudIcon, XIcon, CheckCircleIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-// Create some dummy initial files
-const initialFiles = [
-  {
-    name: "document.pdf",
-    size: 1528737,
-    type: "application/pdf",
-    url: "https://picsum.photos/1000/800?grayscale&random=1",
-    id: "document.pdf-1744638436563-8u5xuls",
-  },
-]
+interface EmailUploadProps {
+  fileName: string | null
+  fileSize: number | null
+  emails: string[]
+  error: string | null
+  isProcessing: boolean
+  isReady: boolean
+  hasResults: boolean
+  onFileUpload: (file: File) => Promise<string[]>
+  onClearData: () => void
+  onClearError: () => void
+  onStartProcessing: () => void
+  onFileProcessed?: (emailCount: number) => void
+}
 
-export default function DragAndDrop() {
-  const maxSize = 10 * 1024 * 1024 // 10MB default
+export default function EmailUpload({ 
+  fileName,
+  fileSize,
+  emails,
+  error,
+  isProcessing,
+  isReady,
+  hasResults,
+  onFileUpload,
+  onClearData,
+  onClearError,
+  onStartProcessing,
+  onFileProcessed 
+}: EmailUploadProps) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragCounter, setDragCounter] = useState(0)
 
-  const [
-    { files, isDragging, errors },
-    {
-      handleDragEnter,
-      handleDragLeave,
-      handleDragOver,
-      handleDrop,
-      openFileDialog,
-      removeFile,
-      getInputProps,
-    },
-  ] = useFileUpload({
-    maxSize,
-    initialFiles,
-  })
+  const maxSize = 50 * 1024 * 1024 // 50MB para listas grandes
+  const acceptedTypes = ['.csv', '.txt', '.xlsx']
 
-  const file = files[0]
+  // Drag handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragCounter(prev => prev + 1)
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragCounter(prev => {
+      const newCounter = prev - 1
+      if (newCounter === 0) {
+        setIsDragging(false)
+      }
+      return newCounter
+    })
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    setDragCounter(0)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      await processFile(files[0])
+    }
+  }, [])
+
+  // File processing
+  const processFile = useCallback(async (file: File) => {
+    // Validações
+    if (file.size > maxSize) {
+      return
+    }
+
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
+    if (!acceptedTypes.includes(fileExtension)) {
+      return
+    }
+
+    try {
+      onClearError()
+      const emails = await onFileUpload(file)
+      onFileProcessed?.(emails.length)
+    } catch (error) {
+      console.error('Erro ao processar arquivo:', error)
+    }
+  }, [onFileUpload, onClearError, onFileProcessed, maxSize])
+
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      await processFile(files[0])
+    }
+  }, [processFile])
+
+  const openFileDialog = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = acceptedTypes.join(',')
+    input.onchange = handleFileSelect as any
+    input.click()
+  }, [handleFileSelect])
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
+  const hasFile = fileName && emails.length > 0
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* Drop area */}
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Drop Zone */}
       <div
         role="button"
         onClick={openFileDialog}
@@ -50,85 +134,113 @@ export default function DragAndDrop() {
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        data-dragging={isDragging || undefined}
-        className="border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed p-4 transition-colors has-disabled:pointer-events-none has-disabled:opacity-50 has-[input:focus]:ring-[3px]"
+        className={`
+          relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 cursor-pointer min-h-80 h-80
+          ${isDragging
+            ? 'border-primary bg-primary/10'
+            : 'border-border hover:border-muted-foreground hover:bg-muted/50'
+          }
+          ${hasFile ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}
+        `}
       >
-        <input
-          {...getInputProps()}
-          className="sr-only"
-          aria-label="Upload file"
-          disabled={Boolean(file)}
-        />
-
-        <div className="flex flex-col items-center justify-center text-center">
-          <div
-            className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <UploadIcon className="size-4 opacity-60" />
+        <div className="flex flex-col items-center justify-center text-center space-y-4 h-full">
+          {/* Icon */}
+          <div className={`
+            w-16 h-16 rounded-full flex items-center justify-center border-2
+            ${hasFile
+              ? 'bg-green-100 border-green-300 dark:bg-green-950 dark:border-green-700'
+              : 'bg-muted border-border'
+            }
+          `}>
+            {hasFile ? (
+              <CheckCircleIcon className="w-8 h-8 text-green-600" />
+            ) : (
+              <UploadCloudIcon className="w-8 h-8 text-muted-foreground" />
+            )}
           </div>
-          <p className="mb-1.5 text-sm font-medium">Upload file</p>
-          <p className="text-muted-foreground text-xs">
-            Drag & drop or click to browse (max. {formatBytes(maxSize)})
-          </p>
+
+          {/* Text */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">
+              {hasFile ? 'Arquivo carregado com sucesso!' : 'Arraste e solte seu arquivo CSV, TXT ou XLSX aqui'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {hasFile ? (
+                `${emails.length} emails encontrados`
+              ) : (
+                <>
+                  Ou <span className="text-primary font-medium">clique para procurar</span> seus arquivos
+                </>
+              )}
+            </p>
+            {!hasFile && (
+              <p className="text-xs text-muted-foreground">
+                Máximo {formatFileSize(maxSize)} • Formatos: CSV, TXT, XLSX
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      {errors.length > 0 && (
-        <div
-          className="text-destructive flex items-center gap-1 text-xs"
-          role="alert"
-        >
-          <AlertCircleIcon className="size-3 shrink-0" />
-          <span>{errors[0]}</span>
-        </div>
+      {/* Error Display */}
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {/* File list */}
-      {file && (
-        <div className="space-y-2">
-          <div
-            key={file.id}
-            className="flex items-center justify-between gap-2 rounded-xl border px-4 py-2"
-          >
-            <div className="flex items-center gap-3 overflow-hidden">
-              <PaperclipIcon
-                className="size-4 shrink-0 opacity-60"
-                aria-hidden="true"
-              />
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-medium">
-                  {file.file.name}
-                </p>
+      {/* File Info */}
+      {hasFile && (
+        <Card className="mt-4">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileTextIcon className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{fileName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {fileSize && formatFileSize(fileSize)} • {emails.length} emails detectados
+                  </p>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {isReady && !hasResults && (
+                  <Button
+                    onClick={onStartProcessing}
+                    disabled={isProcessing}
+                    size="sm"
+                    className="text-xs px-3 py-1 h-7"
+                  >
+                    {isProcessing ? 'Processando...' : 'Iniciar'}
+                  </Button>
+                )}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onClearData}
+                  disabled={isProcessing}
+                  className="text-xs px-3 py-1 h-7"
+                >
+                  Limpar
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClearData}
+                  className="text-muted-foreground hover:text-foreground p-1 h-7 w-7"
+                >
+                  <XIcon className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-
-            <Button
-              size="icon"
-              variant="ghost"
-              className="text-muted-foreground/80 hover:text-foreground -me-2 size-8 hover:bg-transparent"
-              onClick={() => removeFile(files[0]?.id)}
-              aria-label="Remove file"
-            >
-              <XIcon className="size-4" aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
-
-      <p
-        aria-live="polite"
-        role="region"
-        className="text-muted-foreground mt-2 text-center text-xs"
-      >
-        Single file uploader w/ max size ∙{" "}
-        <a
-          href="https://github.com/origin-space/originui/tree/main/docs/use-file-upload.md"
-          className="hover:text-foreground underline"
-        >
-          API
-        </a>
-      </p>
     </div>
   )
 }
