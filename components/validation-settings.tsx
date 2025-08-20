@@ -25,110 +25,92 @@ export function ValidationSettings({ rules, onRulesChange, disabled = false }: V
       <CardContent>
         <ScrollArea className="h-auto max-h-80">
           <div className="space-y-4 pr-4">
-          {/* Validation Rules */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="checkFormat"
-                checked={rules.checkFormat}
-                onCheckedChange={(checked) => handleRuleChange('checkFormat', checked as boolean)}
-                disabled={disabled}
-              />
-              <label 
-                htmlFor="checkFormat" 
-                className="text-sm cursor-pointer"
-              >
-                Validação de formato
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="removeDuplicates"
-                checked={true}
-                disabled={true}
-              />
-              <label 
-                htmlFor="removeDuplicates" 
-                className="text-sm"
-              >
-                Remoção de duplicados
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="checkDisposable"
-                checked={rules.checkDisposable}
-                onCheckedChange={(checked) => handleRuleChange('checkDisposable', checked as boolean)}
-                disabled={disabled}
-              />
-              <label 
-                htmlFor="checkDisposable" 
-                className="text-sm cursor-pointer"
-              >
-                Domínios descartáveis
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="checkRoleBased"
-                checked={rules.checkRoleBased}
-                onCheckedChange={(checked) => handleRuleChange('checkRoleBased', checked as boolean)}
-                disabled={disabled}
-              />
-              <label 
-                htmlFor="checkRoleBased" 
-                className="text-sm cursor-pointer"
-              >
-                E-mails baseados em função
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="domainValidation"
-                checked={true}
-                disabled={true}
-              />
-              <label 
-                htmlFor="domainValidation" 
-                className="text-sm"
-              >
-                Validação de domínio (MX)
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="cleanSpaces"
-                checked={true}
-                disabled={true}
-              />
-              <label 
-                htmlFor="cleanSpaces" 
-                className="text-sm"
-              >
-                Limpeza de espaços em branco
-              </label>
-            </div>
-          </div>
-
-            {/* Additional Options */}
-            <div className="pt-3">
-              <Separator className="mb-3" />
+            {/* Validation Rules */}
+            <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Checkbox
-                  id="preserveCase"
-                  checked={false}
+                  id="checkFormat"
+                  checked={rules.checkFormat}
+                  onCheckedChange={(checked) => handleRuleChange('checkFormat', checked as boolean)}
+                  disabled={disabled}
+                />
+                <label
+                  htmlFor="checkFormat"
+                  className="text-sm cursor-pointer"
+                >
+                  Validação de formato
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="removeDuplicates"
+                  checked={true}
                   disabled={true}
                 />
-                <label 
-                  htmlFor="preserveCase" 
-                  className="text-sm text-muted-foreground"
+                <label
+                  htmlFor="removeDuplicates"
+                  className="text-sm"
                 >
-                  Preservar maiúsculas/minúsculas
+                  Remoção de duplicados
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="checkDisposable"
+                  checked={rules.checkDisposable}
+                  onCheckedChange={(checked) => handleRuleChange('checkDisposable', checked as boolean)}
+                  disabled={disabled}
+                />
+                <label
+                  htmlFor="checkDisposable"
+                  className="text-sm cursor-pointer"
+                >
+                  Domínios descartáveis
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="checkRoleBased"
+                  checked={rules.checkRoleBased}
+                  onCheckedChange={(checked) => handleRuleChange('checkRoleBased', checked as boolean)}
+                  disabled={disabled}
+                />
+                <label
+                  htmlFor="checkRoleBased"
+                  className="text-sm cursor-pointer"
+                >
+                  E-mails baseados em função
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="domainValidation"
+                  checked={true}
+                  disabled={true}
+                />
+                <label
+                  htmlFor="domainValidation"
+                  className="text-sm"
+                >
+                  Validação de domínio (MX)
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="cleanSpaces"
+                  checked={true}
+                  disabled={true}
+                />
+                <label
+                  htmlFor="cleanSpaces"
+                  className="text-sm"
+                >
+                  Limpeza de espaços em branco
                 </label>
               </div>
             </div>

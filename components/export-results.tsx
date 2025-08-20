@@ -34,10 +34,10 @@ export function ExportResults({
         <Button
           onClick={onExportClean}
           disabled={disabled || validEmailsCount === 0}
-          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium text-base"
+          className="w-full h-12font-medium text-base"
         >
           <DownloadIcon className="w-5 h-5 mr-2" />
-          Baixar CSV Limpo
+          Baixar Arquivo
         </Button>
 
         {/* Include Removed Checkbox */}

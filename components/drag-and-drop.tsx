@@ -140,7 +140,7 @@ export default function EmailUpload({
             ? 'border-primary bg-primary/10'
             : 'border-border hover:border-muted-foreground hover:bg-muted/50'
           }
-          ${hasFile ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}
+          ${hasFile ? 'border-primary bg-primary/5 dark:bg-primary/10' : ''}
         `}
       >
         <div className="flex flex-col items-center justify-center text-center space-y-4 h-full">
@@ -148,12 +148,12 @@ export default function EmailUpload({
           <div className={`
             w-16 h-16 rounded-full flex items-center justify-center border-2
             ${hasFile
-              ? 'bg-green-100 border-green-300 dark:bg-green-950 dark:border-green-700'
+              ? 'bg-primary/10 border-primary/30 dark:bg-primary/20 dark:border-primary/40'
               : 'bg-muted border-border'
             }
           `}>
             {hasFile ? (
-              <CheckCircleIcon className="w-8 h-8 text-green-600" />
+              <CheckCircleIcon className="w-8 h-8 text-primary" />
             ) : (
               <UploadCloudIcon className="w-8 h-8 text-muted-foreground" />
             )}
@@ -194,11 +194,13 @@ export default function EmailUpload({
       {hasFile && (
         <Card className="mt-4">
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileTextIcon className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{fileName}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <FileTextIcon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate" title={fileName || ''}>
+                    {fileName}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {fileSize && formatFileSize(fileSize)} • {emails.length} emails detectados
                   </p>
@@ -206,7 +208,7 @@ export default function EmailUpload({
               </div>
               
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {isReady && !hasResults && (
                   <Button
                     onClick={onStartProcessing}
