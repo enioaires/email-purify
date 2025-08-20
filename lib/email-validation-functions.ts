@@ -279,7 +279,7 @@ export function processFile(file: File): Promise<string[]> {
           // Parse do workbook Excel
           const workbook = XLSX.read(data, {
             cellStyles: true,
-            cellFormulas: true,
+            cellFormula: true,
             cellDates: true,
             cellNF: true,
             sheetStubs: true
